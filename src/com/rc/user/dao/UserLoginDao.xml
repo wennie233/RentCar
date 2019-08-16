@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="userLoginBean">
+
+	<resultMap type="com.rc.bean.User" id="userMap">
+	
+		<id property="uid" column="uid"/>
+		<result property="name" column="name"/>
+		<result property="password" column="password"/>
+		<result property="real_name" column="real_name"/>
+		<result property="license" column="license"/>
+		<result property="id_card" column="id_card"/>
+		<result property="tel" column="tel"/>
+		<result property="email" column="email"/>
+		<result property="address" column="address"/>
+		
+	</resultMap>
+	
+			
+	<select id="userLogin"  parameterType="com.rc.bean.User" resultMap="userMap">
+		select * from user where name = #{name} and password = #{password}
+	</select>
+	
+	<insert id="userRegister" parameterType="com.rc.bean.User">
+		insert into user values(0,#{name}, #{password},NULL,NULL,NULL,NULL,#{email},NULL)
+	</insert>
+	
+	<update id="userChangPwd" parameterType="com.rc.bean.User">
+		update user set password = #{password} where uid = #{id} 
+	</update>
+	
+	<update id="userInfoModefied" parameterType="com.rc.bean.User">
+		update user
+		<set>
+			<if test="real_name!=null">
+				real_name = #{real_name},
+			</if>
+			<if test="license!=null">
+				license = #{license},
+			</if>
+			<if test="id_card!=null">
+				id_card = #{id_card},
+			</if>
+			<if test="tel!=null">
+				tel = #{tel},
+			</if>
+			<if test="address!=null">
+				address = #{address},
+			</if>
+		</set>
+		where name = #{name} and password = #{password}
+	</update>
+	
+</mapper>

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+ 
+ 
+<mapper namespace="adminOrderBean">  
+	<resultMap type="com.rc.bean.Admin" id="adminMap">
+		<id property="aid" column="aid"/>
+		<result property="name" column="name"/>
+		<result property="password" column="password"/>
+		<result property="tel" column="tel"/>
+		<result property="mail" column="mail"/>
+		<result property="tel" column="tel"/>
+		<result property="id_card" column="id_card"/>
+		<result property="birthday" column="birthday"/>
+		<result property="address" column="address"/>
+		<collection property="orderList" ofType="com.rc.bean.Orders">
+			<id property="oid" column="oid"/>
+			<result property="car_id" column="car_id"/>
+			<result property="user_id" column="user_id"/>
+			<result property="admin_id" column="admin_id"/>
+			<result property="make_date" column="make_date"/>
+			<result property="deal_date" column="deal_date"/>
+			<result property="from_date" column="from_date"/>
+			<result property="end_date" column="end_date"/>
+			<result property="price" column="price"/>
+			<result property="status" column="status"/>
+			<collection property="carList" ofType="com.rc.bean.Car">
+				<id property="cid" column="cid"/>
+				<result property="branch" column="branch"/>
+				<result property="type" column="type"/>
+				<result property="year" column="year"/>
+				<result property="configure" column="configure"/>
+				<result property="size" column="size"/>
+				<result property="fuel" column="fuel"/>
+				<result property="gus" column="gus"/>
+				<result property="speed" column="speed"/>
+				<result property="drive" column="drive"/>
+				<result property="GPS" column="GPS"/>
+				<result property="price" column="car_price"/>
+				<result property="picture" column="picture"/>
+				<result property="amount" column="amount"/>
+			</collection>
+		</collection>
+
+	</resultMap>
+	
+	
+	<resultMap type="com.rc.bean.Orders" id="ordersMap">
+		<id property="oid" column="oid"/>
+		<result property="car_id" column="car_id"/>
+		<result property="user_id" column="user_id"/>
+		<result property="admin_id" column="admin_id"/>
+		<result property="make_date" column="make_date"/>
+		<result property="deal_date" column="deal_date"/>
+		<result property="from_date" column="from_date"/>
+		<result property="end_date" column="end_date"/>
+		<result property="price" column="price"/>
+		<result property="status" column="status"/>
+	</resultMap>
+	
+	<resultMap type="com.rc.bean.Order_sum" id="osumMap">
+		<id property="id" column="id"/>
+		<result property="order_sum" column="number"/>
+		<result property="Date_part" column="month"/>
+		<result property="prices" column="all_price"/>
+	</resultMap>
+	
+	<select id="look_all_order" parameterType="com.rc.bean.Orders" resultMap="adminMap">
+		select o.oid, c.branch,c.price car_price,o.user_id,o.admin_id,o.make_date,o.deal_date,o.from_date,o.end_date,o.price,o.status
+		from car c inner join orders o on c.cid = o.car_id
+		<where>
+			<if test="user_id != 0">
+				and o.user_id = #{user_id}
+			</if>
+			<if test="admin_id != 0">
+				and o.admin_id = #{admin_id}
+			</if>
+			<if test="from_date != null">
+				and o.from_date >= #{from_date}
+			</if>
+			<if test="end_date != null">
+				and o.end_date &lt;= #{end_date}
+			</if>
+			<if test="status != null">
+				and o.status = #{status}
+			</if>
+		</where>
+	</select>
+	
+	<update id="confirm_user_order" parameterType="com.rc.bean.Orders">
+		update orders set status = '已处理', admin_id = #{admin_id}, deal_date = #{deal_date} where oid = #{oid}
+	</update>
+	
+	<update id="pay_user_order" parameterType="com.rc.bean.Orders">
+		update orders set status = '待结算', admin_id = #{admin_id}, deal_date = #{deal_date} where oid = #{oid}
+	</update>
+	
+	<select id="look_sum_order_by_month" resultMap="osumMap">
+		SELECT COUNT(*) AS 'number',LEFT(make_date,7) AS 'month',SUM(price) AS all_price FROM orders
+		WHERE DATE_FORMAT(make_date,'%Y-%m')>
+		DATE_FORMAT(DATE_SUB(CURDATE(), INTERVAL 12 MONTH),'%Y-%m')
+		GROUP BY MONTH
+		order by month desc
+	</select>
+</mapper>

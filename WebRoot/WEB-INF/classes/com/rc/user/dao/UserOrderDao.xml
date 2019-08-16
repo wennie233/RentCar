@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="userOrderBean">
+
+	<resultMap type="com.rc.bean.User" id="userMap">
+		<id property="uid" column="uid"/>
+		<result property="name" column="name"/>
+		<result property="password" column="password"/>
+		<result property="real_name" column="real_name"/>
+		<result property="license" column="license"/>
+		<result property="id_card" column="id_card"/>
+		<result property="tel" column="tel"/>
+		<result property="email" column="email"/>
+		<result property="address" column="address"/>
+		<collection property="orderList" ofType="com.rc.bean.Orders">
+			<id property="oid" column="oid"/>
+			<result property="car_id" column="car_id"/>
+			<result property="user_id" column="user_id"/>
+			<result property="admin_id" column="admin_id"/>
+			<result property="make_date" column="make_date"/>
+			<result property="deal_date" column="deal_date"/>
+			<result property="from_date" column="from_date"/>
+			<result property="end_date" column="end_date"/>
+			<result property="price" column="price"/>
+			<result property="status" column="status"/>
+			<collection property="carList" ofType="com.rc.bean.Car">
+				<id property="cid" column="cid"/>
+				<result property="branch" column="branch"/>
+				<result property="type" column="type"/>
+				<result property="year" column="year"/>
+				<result property="configure" column="configure"/>
+				<result property="size" column="size"/>
+				<result property="fuel" column="fuel"/>
+				<result property="gus" column="gus"/>
+				<result property="speed" column="speed"/>
+				<result property="drive" column="drive"/>
+				<result property="GPS" column="GPS"/>
+				<result property="price" column="car_price"/>
+				<result property="picture" column="picture"/>
+				<result property="amount" column="amount"/>
+
+			</collection>
+		</collection>
+
+	</resultMap>
+	
+	
+	<resultMap type="com.rc.bean.Orders" id="ordersMap">
+		<id property="oid" column="oid"/>
+		<result property="car_id" column="car_id"/>
+		<result property="user_id" column="user_id"/>
+		<result property="admin_id" column="admin_id"/>
+		<result property="make_date" column="make_date"/>
+		<result property="deal_date" column="deal_date"/>
+		<result property="from_date" column="from_date"/>
+		<result property="end_date" column="end_date"/>
+		<result property="price" column="price"/>
+		<result property="status" column="status"/>
+	</resultMap>
+	
+	<select id="look_user_order" parameterType="com.rc.bean.Orders" resultMap="userMap">
+		select o.oid, c.branch,c.price car_price,o.admin_id,o.from_date,o.end_date,o.price,o.status
+		from car c inner join orders o on c.cid = o.car_id
+		<where>
+			<if test="user_id != 0">
+				and o.user_id = #{user_id}
+			</if>
+			<if test="admin_id != 0">
+				and o.admin_id = #{admin_id}
+			</if>
+			<if test="from_date != null">
+				and o.from_date >= #{from_date}
+			</if>
+			<if test="end_date != null">
+				and o.end_date &lt;= #{end_date}
+			</if>
+			<if test="status != null">
+				and o.status = #{status}
+			</if>
+		</where>
+	</select>
+	
+	<select id="look_finish_order" parameterType="com.rc.bean.Orders" resultMap="userMap">
+		select o.oid, c.branch,c.price car_price,o.admin_id,o.from_date,o.end_date,o.price,o.status
+		from car c inner join orders o on c.cid = o.car_id
+		<where>
+			<if test="user_id != 0">
+				and o.user_id = #{user_id}
+			</if>
+			<if test="admin_id != 0">
+				and o.admin_id = #{admin_id}
+			</if>
+			<if test="from_date != null">
+				and o.from_date >= #{from_date}
+			</if>
+			<if test="end_date != null">
+				and o.end_date &lt;= #{end_date}
+			</if>
+			<if test="status != null">
+				and o.status = #{status}
+			</if>
+		</where>
+	</select>
+	
+	<select id="look_user_order1" parameterType="int" resultMap="ordersMap">
+		select o.oid, c.branch,o.admin_id,o.from_date,o.end_date,o.price,o.status
+		from car c , orders o where c.id = o.car_id and o.id = #{id}
+	</select>
+	
+	<insert id="add_user_order" parameterType="com.rc.bean.Orders">
+		insert into orders values(0,#{car_id}, #{user_id}, null, #{make_date}, null,date_format(#{from_date}, '%Y-%m-%d'),date_format(#{end_date}, '%Y-%m-%d'),#{price},'未处理')
+	</insert>
+		
+	<select id="look_order_by_user" parameterType="int" resultMap="ordersMap">
+		select * from orders 
+		where user_id = #{id} and status != '已结算' and status != '已取消'
+	</select>
+	
+	<update id="cancel_user_order" parameterType="com.rc.bean.Orders">
+		update orders set deal_date = #{deal_date} , status = '已取消' where oid = #{oid}
+	</update>
+	
+	<update id="modify_user_order" parameterType="com.rc.bean.Orders">
+		update orders set from_date = #{from_date}, end_date = #{end_date},price = #{price} where oid = #{oid}
+	</update>
+	
+
+</mapper>

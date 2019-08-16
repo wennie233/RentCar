@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+ PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="userCarBean">
+
+	<resultMap type="com.rc.bean.Car" id="carMap">
+		<id property="cid" column="cid"/>
+		<result property="branch" column="branch"/>
+		<result property="type" column="type"/>
+		<result property="year" column="year"/>
+		<result property="configure" column="configure"/>
+		<result property="size" column="size"/>
+		<result property="fuel" column="fuel"/>
+		<result property="gus" column="gus"/>
+		<result property="speed" column="speed"/>
+		<result property="drive" column="drive"/>
+		<result property="GPS" column="GPS"/>
+		<result property="price" column="price"/>
+		<result property="picture" column="picture"/>
+		<result property="amount" column="amount"/>
+	</resultMap>
+	
+	<select id="user_get_carInfo" resultType="com.rc.bean.Car">
+		select * from car where amount != 0 and status = '正常'
+	</select>
+	
+	<select id="look_car_info" parameterType="int" resultMap="carMap">
+		select * from car where cid = #{id}
+	</select>
+	
+	<update id="reset_car_amount" parameterType="int">
+		update car set amount = amount - 1 where cid = #{car_id} 
+	</update>
+	
+	
+
+</mapper>
